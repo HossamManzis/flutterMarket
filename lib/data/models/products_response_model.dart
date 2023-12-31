@@ -1,10 +1,16 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
+
 class ProductsResponseModel {
-  final List<Product> data;
+  List<Product>? data;
+  Links? links;
+  Meta? meta;
 
   ProductsResponseModel({
-    required this.data,
+    this.data,
+    this.links,
+    this.meta,
   });
 
   factory ProductsResponseModel.fromJson(String str) =>
@@ -14,31 +20,34 @@ class ProductsResponseModel {
 
   factory ProductsResponseModel.fromMap(Map<String, dynamic> json) =>
       ProductsResponseModel(
-        data: List<Product>.from(json["data"].map((x) => Product.fromMap(x))),
+        data: json["data"] == null
+            ? []
+            : List<Product>.from(json["data"]!.map((x) => Product.fromMap(x))),
+        links: json["links"] == null ? null : Links.fromMap(json["links"]),
+        meta: json["meta"] == null ? null : Meta.fromMap(json["meta"]),
       );
 
   Map<String, dynamic> toMap() => {
-        "data": List<dynamic>.from(data.map((x) => x.toMap())),
+        "data":
+            data == null ? [] : List<dynamic>.from(data!.map((x) => x.toMap())),
+        "links": links?.toMap(),
+        "meta": meta?.toMap(),
       };
 }
 
 class Product {
-  final int id;
-  final String name;
-  final String descripton;
-  final int price;
-  final String imageProduct;
-  final Category category;
-  final User user;
+  int? id;
+  String? name;
+  String? descripton;
+  int? price;
+  String? imageProduct;
 
   Product({
-    required this.id,
-    required this.name,
-    required this.descripton,
-    required this.price,
-    required this.imageProduct,
-    required this.category,
-    required this.user,
+    this.id,
+    this.name,
+    this.descripton,
+    this.price,
+    this.imageProduct,
   });
 
   factory Product.fromJson(String str) => Product.fromMap(json.decode(str));
@@ -51,8 +60,6 @@ class Product {
         descripton: json["descripton"],
         price: json["price"],
         imageProduct: json["image_product"],
-        category: Category.fromMap(json["category"]),
-        user: User.fromMap(json["user"]),
       );
 
   Map<String, dynamic> toMap() => {
@@ -61,71 +68,138 @@ class Product {
         "descripton": descripton,
         "price": price,
         "image_product": imageProduct,
-        "category": category.toMap(),
-        "user": user.toMap(),
       };
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is Product &&
+        other.id == id &&
+        other.name == name &&
+        other.descripton == descripton &&
+        other.price == price &&
+        other.imageProduct == imageProduct;
+  }
+
+  @override
+  int get hashCode {
+    return id.hashCode ^
+        name.hashCode ^
+        descripton.hashCode ^
+        price.hashCode ^
+        imageProduct.hashCode;
+  }
 }
 
-class Category {
-  final int id;
-  final String name;
-  final String description;
-  final DateTime createdAt;
-  final DateTime updatedAt;
+class Links {
+  String? first;
+  String? last;
+  dynamic prev;
+  String? next;
 
-  Category({
-    required this.id,
-    required this.name,
-    required this.description,
-    required this.createdAt,
-    required this.updatedAt,
+  Links({
+    this.first,
+    this.last,
+    this.prev,
+    this.next,
   });
 
-  factory Category.fromJson(String str) => Category.fromMap(json.decode(str));
+  factory Links.fromJson(String str) => Links.fromMap(json.decode(str));
 
   String toJson() => json.encode(toMap());
 
-  factory Category.fromMap(Map<String, dynamic> json) => Category(
-        id: json["id"],
-        name: json["name"],
-        description: json["description"],
-        createdAt: DateTime.parse(json["created_at"]),
-        updatedAt: DateTime.parse(json["updated_at"]),
+  factory Links.fromMap(Map<String, dynamic> json) => Links(
+        first: json["first"],
+        last: json["last"],
+        prev: json["prev"],
+        next: json["next"],
       );
 
   Map<String, dynamic> toMap() => {
-        "id": id,
-        "name": name,
-        "description": description,
-        "created_at": createdAt.toIso8601String(),
-        "updated_at": updatedAt.toIso8601String(),
+        "first": first,
+        "last": last,
+        "prev": prev,
+        "next": next,
       };
 }
 
-class User {
-  final int id;
-  final String name;
-  final String role;
+class Meta {
+  int? currentPage;
+  int? from;
+  int? lastPage;
+  List<Link>? links;
+  String? path;
+  int? perPage;
+  int? to;
+  int? total;
 
-  User({
-    required this.id,
-    required this.name,
-    required this.role,
+  Meta({
+    this.currentPage,
+    this.from,
+    this.lastPage,
+    this.links,
+    this.path,
+    this.perPage,
+    this.to,
+    this.total,
   });
 
-  factory User.fromJson(String str) => User.fromMap(json.decode(str));
+  factory Meta.fromJson(String str) => Meta.fromMap(json.decode(str));
 
   String toJson() => json.encode(toMap());
 
-  factory User.fromMap(Map<String, dynamic> json) => User(
-        id: json["id"],
-        name: json["name"],
-        role: json["role"],
+  factory Meta.fromMap(Map<String, dynamic> json) => Meta(
+        currentPage: json["current_page"],
+        from: json["from"],
+        lastPage: json["last_page"],
+        links: json["links"] == null
+            ? []
+            : List<Link>.from(json["links"]!.map((x) => Link.fromMap(x))),
+        path: json["path"],
+        perPage: json["per_page"],
+        to: json["to"],
+        total: json["total"],
       );
 
   Map<String, dynamic> toMap() => {
-        "id": id,
-        "name": name,
-        "role": role,
+        "current_page": currentPage,
+        "from": from,
+        "last_page": lastPage,
+        "links": links == null
+            ? []
+            : List<dynamic>.from(links!.map((x) => x.toMap())),
+        "path": path,
+        "per_page": perPage,
+        "to": to,
+        "total": total,
+      };
+}
+
+class Link {
+  String? url;
+  String? label;
+  bool? active;
+
+  Link({
+    this.url,
+    this.label,
+    this.active,
+  });
+
+  factory Link.fromJson(String str) => Link.fromMap(json.decode(str));
+
+  String toJson() => json.encode(toMap());
+
+  factory Link.fromMap(Map<String, dynamic> json) => Link(
+        url: json["url"],
+        label: json["label"],
+        active: json["active"],
+      );
+
+  Map<String, dynamic> toMap() => {
+        "url": url,
+        "label": label,
+        "active": active,
       };
 }
